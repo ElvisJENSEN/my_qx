@@ -1,0 +1,6 @@
+# ===== AI 分流规则补充 =====
+# 更新时间：2026-10-20
+
+HOST-SUFFIX,googleapis.com,no-policy
+HOST-SUFFIX,googleusercontent.com,no-policy
+HOST-SUFFIX,google.com,no-policy
