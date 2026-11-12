@@ -138,3 +138,4 @@ HOST-SUFFIX,google,no-policy
 HOST-SUFFIX,google-analytics.com,no-policy
 HOST-SUFFIX,googleusercontent.com,no-policy
 HOST-SUFFIX,googleapis.com,no-policy
+HOST-SUFFIX,colab.dev,no-policy
