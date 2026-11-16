@@ -139,3 +139,8 @@ HOST-SUFFIX,google-analytics.com,no-policy
 HOST-SUFFIX,googleusercontent.com,no-policy
 HOST-SUFFIX,googleapis.com,no-policy
 HOST-SUFFIX,colab.dev,no-policy
+############Facebook Muse
+HOST-SUFFIX,facebook.com,no-policy
+HOST-SUFFIX,meta.com,no-policy
+HOST-SUFFIX,facebook.com,no-policy
+HOST-SUFFIX,muse.ai,no-policy
