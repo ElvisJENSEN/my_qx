@@ -3094,7 +3094,7 @@ function Fobfs(jsonl, Pcert0, PTls13) {
     obfs0 = "obfs=wss, " + tcert + ", " + tls13 + ", ";
     uri0 = jsonl.path && jsonl.path != "" ? "obfs-uri=" + jsonl.path : "obfs-uri=/";
     uri0 = uri0.indexOf("uri=/")!=-1 ? uri0:uri0.replace("uri=","uri=/")
-    host0 = jsonl.host && jsonl.host != "" ? "obfs-host=" + jsonl.host + ", " : "";
+    host0 = jsonl.host && jsonl.host != "" ? "obfs-host=" + jsonl.host + ", " : (jsonl.sni && jsonl.sni != "" ? "obfs-host=" + jsonl.sni + ", " : "");
     obfsi.push(obfs0 + host0 + uri0)
     return obfsi.join(", ")
   } else if (jsonl.net == "ws") {
@@ -3108,7 +3108,7 @@ function Fobfs(jsonl, Pcert0, PTls13) {
     obfs0 = "obfs=over-tls, " + tcert + ", " + tls13;
     uri0 = jsonl.path && jsonl.path != "" ? "obfs-uri=" + jsonl.path : "";
     uri0 = uri0.indexOf("uri=/")!=-1 ? uri0:uri0.replace("uri=","uri=/")
-    host0 = jsonl.host && jsonl.host != "" ? ", obfs-host=" + jsonl.host : "";
+    host0 = jsonl.sni && jsonl.sni != "" ? ", obfs-host=" + jsonl.sni : (jsonl.host && jsonl.host != "" ? ", obfs-host=" + jsonl.host : "");
     obfsi.push(obfs0 + host0)
     return obfsi.join(", ")
   } else if ((jsonl.net == "tcp" || jsonl.net == "none") && jsonl.type == "http"){
@@ -3885,6 +3885,8 @@ function TJ2QX(subs, Pudp, Ptfo, Pcert0, PTls13) {
       thost=cnt.indexOf("&host=") == -1? thost : "obfs-host=" + decodeURIComponent(cnt.split("&host=")[1].split("&")[0].split("#")[0])
       puri = cnt.indexOf("&path=") == -1? puri : "obfs-uri=" + decodeURIComponent(cnt.split("&path=")[1].split("&")[0].split("#")[0])
     }
+    // wss 类型不使用 tls-host, 仅有 sni 时转为 obfs-host
+    if (obfs == "obfs=wss" && thost.indexOf("tls-host=") == 0) { thost = thost.replace("tls-host=", "obfs-host=") }
     // Reality para 2025-12-31
     prlt= version>=891? Reality_Handle(cnt) : ""
     ntrojan.push(type + ip, pwd, obfs, pcert, thost, puri, pudp, ptfo,prlt,tag)
@@ -5486,9 +5488,13 @@ function CT2QX(cnt) {
     //$notify("trojan","WS",JSON.stringify(cnt))
     if (cnt["ws-opts"]){
     opath = cnt["ws-opts"]["path"]? "obfs-uri="+cnt["ws-opts"]["path"] : ""
-    ohost = cnt["ws-opts"]["headers"]? "obfs-host="+cnt["ws-opts"]["headers"]["Host"] : ""
+    ohost = cnt["ws-opts"]["headers"] && cnt["ws-opts"]["headers"]["Host"]? "obfs-host="+cnt["ws-opts"]["headers"]["Host"] : ""
     }
+    // wss 无 Host 时，用 sni 作为 obfs-host (QX 中 wss 的 obfs-host 兼作 SNI)
+    ohost = !ohost && (cnt.sni || cnt.servername) ? "obfs-host="+(cnt.sni || cnt.servername) : ohost
     //$notify("trojan","WS",opath+":"+ohost)
+  } else if (cnt.sni || cnt.servername) { // over-tls 类型添加 tls-host
+    ohost = "tls-host="+(cnt.sni || cnt.servername)
   }
   node = "trojan="+[ipt, pwd, otls, opath, ohost, cert, tls13, udp, tfo, tag].filter(Boolean).join(", ")
   //console.log(node)
@@ -5519,7 +5525,8 @@ function CH2QX(cnt){
     pwd = cnt.password && typeof(cnt.password) == "string" ? "password=" + cnt.password : ""
     tls = cnt.tls ? "over-tls=true" : ""
     cert = cnt.tls ? TLSCertParam(Pcert0, "false") : ""
-    node = "http="+[ipt, uname, pwd, tls, cert, tag].filter(Boolean).join(", ")
+    thost = cnt.tls && (cnt.sni || cnt.servername) ? "tls-host="+(cnt.sni || cnt.servername) : ""
+    node = "http="+[ipt, uname, pwd, tls, thost, cert, tag].filter(Boolean).join(", ")
     //console.log(node)
     return node
 }
@@ -5532,7 +5539,8 @@ function CS52QX(cnt){
     pwd = cnt.password && typeof(cnt.password) == "string" ? "password=" + cnt.password : ""
     tls = cnt.tls ? "over-tls=true" : ""
     cert = cnt.tls ? TLSCertParam(Pcert0, "false") : ""
-    node = "socks5="+[ipt, uname, pwd, tls, cert, tag].filter(Boolean).join(", ")
+    thost = cnt.tls && (cnt.sni || cnt.servername) ? "tls-host="+(cnt.sni || cnt.servername) : ""
+    node = "socks5="+[ipt, uname, pwd, tls, thost, cert, tag].filter(Boolean).join(", ")
     //console.log(node)
     return node
 }
